@@ -41,47 +41,7 @@
             transform: translate(0, -50%);
         }
 
-        .flex-container {
-            display: -ms-flexbox;
-            display: -webkit-flex;
-            display: flex;
-            -webkit-flex-direction: row;
-            -ms-flex-direction: row;
-            flex-direction: row;
-            -webkit-flex-wrap: nowrap;
-            -ms-flex-wrap: nowrap;
-            flex-wrap: nowrap;
-            -webkit-justify-content: flex-start;
-            -ms-flex-pack: start;
-            justify-content: flex-end;
-            -webkit-align-content: stretch;
-            -ms-flex-line-pack: stretch;
-            align-content: stretch;
-            }
 
-        .flex-item:nth-child(1) {
-            -webkit-order: 0;
-            -ms-flex-order: 0;
-            order: 0;
-            -webkit-flex: 0 1 auto;
-            -ms-flex: 0 1 auto;
-            flex: 0 1 auto;
-            -webkit-align-self: auto;
-            -ms-flex-item-align: auto;
-            align-self: auto;
-            }
-
-        .flex-item:nth-child(2) {
-            -webkit-order: 0;
-            -ms-flex-order: 0;
-            order: 0;
-            -webkit-flex: 0 1 auto;
-            -ms-flex: 0 1 auto;
-            flex: 0 1 auto;
-            -webkit-align-self: auto;
-            -ms-flex-item-align: auto;
-            align-self: auto;
-            }
     </style>
 </head>
 <body>
@@ -90,10 +50,10 @@
         <img src="./resources/loading.svg" />
     </div>
 
-    <div class="center">
-        <div class="flex-container">
-            <div class="flex-item"><img src="./resources/app-logo.svg"  width="200px"></div>
-            <div class="flex-item" style="margin-left: 10px">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4"><img src="./resources/app-logo.svg" width="200px"></div>
+            <div class="col-md-8">
                 <h2>Download stems from ccMixter</h2>
                 <div>
                     Tired of clicking every single file and choosing the right directory?<br />
@@ -106,20 +66,20 @@
                 </div>
             </div>
         </div>
-        <br />
-
-        <form id="library-form" class="form-horizontal">
-            <div class="form-group">
-                <label for="library_path" class="sr-only control-label">Path to save files to</label>
-                <div>
-                    <input type="text" id="library_path" class="form-control" placeholder="Library path" value="" />
-                </div>
-                <button type="submit" id="btnChoosePath" class="btn btn-primary">Choose path</button>
+        <div class="row">
+            <div class="col-md-12">
+                <form id="library-form" class="form-horizontal">
+                    <div class="form-group">
+                        <label for="library_path" class="sr-only control-label">Path to save files to</label>
+                        <div>
+                            <input type="text" id="library_path" class="form-control" placeholder="Library path" value="" />
+                        </div>
+                        <button type="submit" id="btnChoosePath" class="btn btn-primary">Choose path</button>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
 
-        <br />
-        
         <form id="song" class="form-horizontal">
             <div class="form-group">
                 <label for="url" class="sr-only control-label">URL</label>
@@ -129,8 +89,6 @@
             </div>    
             <button type="submit" id="btnCheck" class="btn btn-primary">Check</button>
         </form>
-
-        <br />
 
         <div id="stems">
           Files to download:<br />

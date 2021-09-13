@@ -19,6 +19,34 @@ $("#song").on("submit", (e) => {
     ipcRenderer.send("fetch-json-from-url", url);
 });
 
+$("#library-form").on("submit", (e) => {
+    e.preventDefault();
+    ipcRenderer.send("select-library-path", $("#library_path").val());
+});
+
+$("#download").on("submit", (e) => {
+    e.preventDefault();
+
+    $("#btnDownload").hide();
+    $("input[type=checkbox]").prop('disabled', true);
+
+    let files = [];
+
+    let formData = $("#download ul li input:checked");
+    for(var i = 0; i < formData.length; i++) {
+        files.push( $(formData[i]).val() );
+    }
+
+    ipcRenderer.send("download", files);
+});
+
+$("#btnAbortDownload").on("click", (e) => {
+    e.preventDefault();
+    $('#song').show();
+    $('#btnDownload').show();
+    $('#stems').hide();
+});
+
 ipcRenderer.on('add-file', (event, songInfo) => {
     //console.log(songInfo);
     $('#filelist').append([
@@ -53,34 +81,6 @@ ipcRenderer.on('library-path-updated', (event, lpath) => {
         $("#library_path").val(lpath);
         $('#btnCheck').prop('disabled', false);
     }
-});
-
-$("#library-form").on("submit", (e) => {
-    e.preventDefault();
-    ipcRenderer.send("select-library-path", $("#library_path").val());
-});
-
-$("#download").on("submit", (e) => {
-    e.preventDefault();
-
-    $("#btnDownload").hide();
-    $("input[type=checkbox]").prop('disabled', true);
-
-    let files = [];
-
-    let formData = $("#download ul li input:checked");
-    for(var i = 0; i < formData.length; i++) {
-        files.push( $(formData[i]).val() );
-    }
-
-    ipcRenderer.send("download", files);
-});
-
-$("#btnAbortDownload").on("click", (e) => {
-    e.preventDefault();
-    $('#song').show();
-    $('#btnDownload').show();
-    $('#stems').hide();
 });
 
 $('#song').show();

@@ -21,53 +21,6 @@ const store = new Store({
   }
 });
 
-const getSongInfo = (url, e) => {
-  const ccMixterId = url.split('/').pop();
-  const ccMixterSongInfoURL = "http://ccmixter.org/api/query/api?ids=http://ccmixter.org/api/query?f=m3u&ids=" + ccMixterId + "&f=json";
-
-  //console.log(ccMixterSongInfoURL);
-
-  http.get(ccMixterSongInfoURL, function(res){
-    var body = '';
-    trackList = {};
-
-    res.on('data', function(chunk){
-      body += chunk;
-    });
-
-    res.on('end', function(){
-      var response = JSON.parse(body);
-      res = response[0];
-      // console.log(response[0]);
-      songInfo.title = res.upload_name;
-      songInfo.artist = res.user_name;
-      songInfo.bpm = res.upload_extra.bpm;
-
-      //console.log(songInfo);
-
-      for(var i = 0; i < res.files.length; i++) {
-        let trackInfo = {
-          fileName: res.files[i].file_name,
-          fileNiceName: res.files[i].file_nicname,
-          fileId: res.files[i].file_id,
-          trackId: res.files[i].file_upload,
-          downloadURL: res.files[i].download_url,
-          fileSize: res.files[i].file_rawsize
-        }
-        trackList[trackInfo.fileId] = trackInfo;
-
-        e.sender.send('add-file', trackInfo);
-      }
-
-      //console.log(trackList);
-    });
-  }).on('error', function(e){
-    //error handling
-    console.log("Got an error: ", e);
-  });
-
-}
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
   app.quit();
@@ -121,13 +74,54 @@ app.on('activate', () => {
   }
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
 
-ipcMain.on("fetch-json-from-url",(e, url)=>{
-  //console.log("URL to fetch: " + url);
-  getSongInfo(url, e);
-});
+const getSongInfo = (url, e) => {
+  const ccMixterId = url.split('/').pop();
+  const ccMixterSongInfoURL = "http://ccmixter.org/api/query/api?ids=http://ccmixter.org/api/query?f=m3u&ids=" + ccMixterId + "&f=json";
+
+  //console.log(ccMixterSongInfoURL);
+
+  http.get(ccMixterSongInfoURL, function(res){
+    var body = '';
+    trackList = {};
+
+    res.on('data', function(chunk){
+      body += chunk;
+    });
+
+    res.on('end', function(){
+      var response = JSON.parse(body);
+      res = response[0];
+      // console.log(response[0]);
+      songInfo.title = res.upload_name;
+      songInfo.artist = res.user_name;
+      songInfo.bpm = res.upload_extra.bpm;
+
+      //console.log(songInfo);
+
+      for(var i = 0; i < res.files.length; i++) {
+        let trackInfo = {
+          fileName: res.files[i].file_name,
+          fileNiceName: res.files[i].file_nicname,
+          fileId: res.files[i].file_id,
+          trackId: res.files[i].file_upload,
+          downloadURL: res.files[i].download_url,
+          fileSize: res.files[i].file_rawsize
+        }
+        trackList[trackInfo.fileId] = trackInfo;
+
+        e.sender.send('add-file', trackInfo);
+      }
+
+      //console.log(trackList);
+    });
+  }).on('error', function(e){
+    //error handling
+    console.log("Got an error: ", e);
+  });
+
+}
+
 
 const downloadFromUrl = (e, sInfo, cFile) => {
   var newFilename = slug(sInfo.artist.toString()) + '_' + slug(sInfo.title.toString()) + '_' + slug(cFile.fileNiceName.toString()) + '[' + sInfo.bpm + ']' + path.extname(cFile.fileName);
@@ -158,6 +152,11 @@ const downloadFromUrl = (e, sInfo, cFile) => {
     } 
   })(); 
 }
+
+ipcMain.on("fetch-json-from-url",(e, url)=>{
+  //console.log("URL to fetch: " + url);
+  getSongInfo(url, e);
+});
 
 ipcMain.on("download", (e, files) => {
   for (var i = 0; i < files.length; i++) {
