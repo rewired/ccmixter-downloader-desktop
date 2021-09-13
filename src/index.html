@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <title>Download stems from ccMixter</title>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body{
+            background-color: #eee;
+            margin: auto;
+            overflow: hidden;
+        }
+        .center {
+            margin: auto;
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%
+        }
+
+        ul#filelist {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        #loading {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            background-color: #fff;
+            text-align: center;
+        }
+
+        #loading img {
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: calc(50% - 100px);
+            transform: translate(0, -50%);
+        }
+
+        .flex-container {
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-flex-direction: row;
+            -ms-flex-direction: row;
+            flex-direction: row;
+            -webkit-flex-wrap: nowrap;
+            -ms-flex-wrap: nowrap;
+            flex-wrap: nowrap;
+            -webkit-justify-content: flex-start;
+            -ms-flex-pack: start;
+            justify-content: flex-end;
+            -webkit-align-content: stretch;
+            -ms-flex-line-pack: stretch;
+            align-content: stretch;
+            }
+
+        .flex-item:nth-child(1) {
+            -webkit-order: 0;
+            -ms-flex-order: 0;
+            order: 0;
+            -webkit-flex: 0 1 auto;
+            -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+            -webkit-align-self: auto;
+            -ms-flex-item-align: auto;
+            align-self: auto;
+            }
+
+        .flex-item:nth-child(2) {
+            -webkit-order: 0;
+            -ms-flex-order: 0;
+            order: 0;
+            -webkit-flex: 0 1 auto;
+            -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+            -webkit-align-self: auto;
+            -ms-flex-item-align: auto;
+            align-self: auto;
+            }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <h2 style="margin-top: 32vh;">Working...</h2>
+        <img src="./resources/loading.svg" />
+    </div>
+
+    <div class="center">
+        <div class="flex-container">
+            <div class="flex-item"><img src="./resources/app-logo.svg"  width="200px"></div>
+            <div class="flex-item" style="margin-left: 10px">
+                <h2>Download stems from ccMixter</h2>
+                <div>
+                    Tired of clicking every single file and choosing the right directory?<br />
+                    Look no further, here is a tool that let you download all stems from a particular song in one go.
+                    <br/><br />
+                    <strong>Examples</strong><br />
+                    http://ccmixter.org/files/7OOP3D/63981<br />
+                    http://ccmixter.org/files/mactonite/64113<br />
+                    http://ccmixter.org/files/airtone/64030<br />
+                </div>
+            </div>
+        </div>
+        <br />
+
+        <form id="library-form" class="form-horizontal">
+            <div class="form-group">
+                <label for="library_path" class="sr-only control-label">Path to save files to</label>
+                <div>
+                    <input type="text" id="library_path" class="form-control" placeholder="Library path" value="" />
+                </div>
+                <button type="submit" id="btnChoosePath" class="btn btn-primary">Choose path</button>
+            </div>
+        </form>
+
+        <br />
+        
+        <form id="song" class="form-horizontal">
+            <div class="form-group">
+                <label for="url" class="sr-only control-label">URL</label>
+                <div>
+                    <input type="text" id="url" class="form-control" placeholder="URL" value="http://ccmixter.org/files/7OOP3D/63981" />
+                </div>
+            </div>    
+            <button type="submit" id="btnCheck" class="btn btn-primary">Check</button>
+        </form>
+
+        <br />
+
+        <div id="stems">
+          Files to download:<br />
+          <form id="download">
+            <ul id="filelist"></ul>
+            <button type="submit" id="btnDownload" class="btn btn-primary">Download</button>
+            <button type="reset" id="btnAbortDownload" class="btn btn-primary">Other song</button>
+          </form>
+        </div>
+    </div>
+    <script defer src="./render.js"></script>
+</body>
+</html>
