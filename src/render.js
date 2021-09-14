@@ -1,4 +1,6 @@
 let $ = jQuery = require("jquery");
+require('bootstrap');
+
 let numeral = require("numeral");
 const {ipcRenderer} = require("electron");
 
@@ -123,3 +125,16 @@ if( library_path != '' ) {
     $('#btnCheck').prop('disabled', true);
     $('#btnDownload').prop('disabled', true);
 }
+
+$(".example-link").on("click", (e) => {
+    $("#url").val(($(e.target).html()));
+    $("#url").fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
+});
+
+$(".copyright-toggle").on("click", (e) => {
+    $("#copyright").modal("toggle");
+});
+
+$("#open-folder-in-os").on("click", (e) => {
+    ipcRenderer.send("open-folder-in-os", $("#library_path").val());
+});

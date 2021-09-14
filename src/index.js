@@ -6,6 +6,7 @@ const slug = require('slug');
 const Downloader = require('nodejs-file-downloader');
 const Store = require('./store.js');
 const querystring = require('querystring');
+const { shell } = require('electron');
 
 let songInfo = {};
 let trackList = {};
@@ -52,7 +53,7 @@ const createWindow = (options, libpath) => {
   }));
 
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 };
 
 app.on("ready", () => {
@@ -169,4 +170,9 @@ ipcMain.on("select-library-path", async (e, curPath) => {
   store.set('libraryPath', libraryPath.toString());
 
   e.sender.send('library-path-updated', libraryPath);
+});
+
+ipcMain.on("open-folder-in-os", (e, path) => {
+  console.log(path);
+  shell.showItemInFolder(path);
 });
