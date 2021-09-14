@@ -52,7 +52,7 @@ const createWindow = (options, libpath) => {
   }));
 
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 };
 
 app.on("ready", () => {
@@ -112,11 +112,9 @@ const getSongInfo = (url, e) => {
 
         e.sender.send('add-file', trackInfo);
       }
-
-      //console.log(trackList);
     });
   }).on('error', function(e){
-    //error handling
+    //@todo: error handling
     console.log("Got an error: ", e);
   });
 
@@ -125,7 +123,6 @@ const getSongInfo = (url, e) => {
 
 const downloadFromUrl = (e, sInfo, cFile) => {
   var newFilename = slug(sInfo.artist.toString()) + '_' + slug(sInfo.title.toString()) + '_' + slug(cFile.fileNiceName.toString()) + '[' + sInfo.bpm + ']' + path.extname(cFile.fileName);
-  //console.log(newFilename);
 
   ( async () => {
     const downloader = new Downloader({
@@ -133,7 +130,6 @@ const downloadFromUrl = (e, sInfo, cFile) => {
       directory: libraryPath + "/" + slug(sInfo.artist.toString()) + "/" + slug(sInfo.title.toString()) + " [" + sInfo.bpm + "]",
       fileName: newFilename,
       onProgress: (percentage,chunk,remainingSize) => {
-        //console.log(cFile.fileId + ': ' + percentage + '%');
         var progressInfo = {};
         progressInfo.id = cFile.fileId;
         progressInfo.value = percentage;
@@ -154,7 +150,6 @@ const downloadFromUrl = (e, sInfo, cFile) => {
 }
 
 ipcMain.on("fetch-json-from-url",(e, url)=>{
-  //console.log("URL to fetch: " + url);
   getSongInfo(url, e);
 });
 

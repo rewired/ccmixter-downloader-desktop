@@ -41,18 +41,40 @@
             transform: translate(0, -50%);
         }
 
+        td:last-child{ 
+            width: 9em;
+        }
 
+        td:nth-child(0n+3){
+            width: 6em;
+            text-align: right;
+        }
+
+        td:first-child {
+            width: 1em;
+        }
     </style>
 </head>
 <body>
     <div id="loading">
         <h2 style="margin-top: 32vh;">Working...</h2>
-        <img src="./resources/loading.svg" />
+        <img src="./resources/loading.svg" /><br />
     </div>
 
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-4"><img src="./resources/app-logo.svg" width="200px"></div>
+        <div class="row" style="margin-top: 10px;">
+            <div class="col-md-4">
+                <img src="./resources/app-logo.svg" style="width: 100%; margin-bottom: 10px;">
+                <form id="library-form" class="form-horizontal">
+                    <div class="form-group">
+                        <label for="library_path" class="sr-only control-label">Path to save files to</label>
+                        <div>
+                            <input type="text" id="library_path" class="form-control" placeholder="Library path" value="" readonly="readonly" />
+                        </div>
+                        <button type="submit" id="btnChoosePath" class="btn btn-primary">Choose path</button>
+                    </div>
+                </form>
+            </div>
             <div class="col-md-8">
                 <h2>Download stems from ccMixter</h2>
                 <div>
@@ -66,36 +88,32 @@
                 </div>
             </div>
         </div>
+        <hr size="1" />
         <div class="row">
             <div class="col-md-12">
-                <form id="library-form" class="form-horizontal">
+                <form id="song" class="form-horizontal">
                     <div class="form-group">
-                        <label for="library_path" class="sr-only control-label">Path to save files to</label>
+                        <label for="url" class="sr-only control-label">URL</label>
                         <div>
-                            <input type="text" id="library_path" class="form-control" placeholder="Library path" value="" />
+                            <input type="text" id="url" class="form-control" placeholder="URL" value="http://ccmixter.org/files/7OOP3D/63981" />
                         </div>
-                        <button type="submit" id="btnChoosePath" class="btn btn-primary">Choose path</button>
-                    </div>
+                    </div>    
+                    <button type="submit" id="btnCheck" class="btn btn-primary">Check</button>
                 </form>
             </div>
         </div>
-
-        <form id="song" class="form-horizontal">
-            <div class="form-group">
-                <label for="url" class="sr-only control-label">URL</label>
-                <div>
-                    <input type="text" id="url" class="form-control" placeholder="URL" value="http://ccmixter.org/files/7OOP3D/63981" />
-                </div>
-            </div>    
-            <button type="submit" id="btnCheck" class="btn btn-primary">Check</button>
-        </form>
-
+        
         <div id="stems">
-          Files to download:<br />
+          <strong>Files to download:</strong>
           <form id="download">
-            <ul id="filelist"></ul>
+            <table class="table table-sm">
+                <tbody id="filelist">
+                </tbody>
+            </table>
+         
             <button type="submit" id="btnDownload" class="btn btn-primary">Download</button>
             <button type="reset" id="btnAbortDownload" class="btn btn-primary">Other song</button>
+            <span id="download-in-progress">Please be patient, download in progress...</span>
           </form>
         </div>
     </div>
