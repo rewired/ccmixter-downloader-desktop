@@ -1,8 +1,8 @@
-let $ = jQuery = require("jquery");
-require('bootstrap');
-
-let numeral = require("numeral");
 const {ipcRenderer} = require("electron");
+const numeral = require("numeral");
+
+const $ = jQuery = require("jquery");
+require('../node_modules/bootstrap/dist/js/bootstrap.bundle.min');
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
@@ -22,6 +22,14 @@ const checkURL = () => {
         $('#btnCheck').prop('disabled', true);
     }
 };
+
+const utf8_to_b64 = (str) => {
+    return window.btoa(unescape(encodeURIComponent(str)));
+}
+  
+const b64_to_utf8 = (str) => {
+    return decodeURIComponent(escape(window.atob(str)));
+}
 
 $("#library-form").on("submit", (e) => {
     e.preventDefault();
@@ -73,6 +81,32 @@ $("#btnAbortDownload").on("click", (e) => {
 });
 
 ipcRenderer.on('song-info:add-file', (event, songInfo) => {
+    
+    // multipurpose field
+    let mpField = "</td><td>";
+    let fileExt = songInfo.downloadURL.split('.').pop();
+
+    let mimeTypes = {
+        mp3: 'audio/mpeg',
+        ogg: 'audio/ogg',
+        flac: 'audio/flac',
+        wav: 'audio/wav'
+    }
+
+    switch(songInfo.fileInfo["media-type"]) {
+        case "audio": {
+            mpField += "<audio controls=\"controls\"><source src=\"" + songInfo.downloadURL + "\" type=\"" + mimeTypes[fileExt] + "\" />No Support for '" + fileExt + "'</audio>";
+            break;
+        }
+        case "archive": {
+            mpField += "<span class=\"fileinfo\" id=\"fileinfo-" + songInfo.fileId + "\">Info</span>";
+            break;
+        }
+        default: {
+            mpField += '<br />';
+        }
+    }
+
     $('#filelist').append([
         "<tr><td><input id=\"",
         songInfo.fileId,
@@ -81,12 +115,22 @@ ipcRenderer.on('song-info:add-file', (event, songInfo) => {
         "\" checked=\"checked\" /></td><td>",
         songInfo.fileName,
         "</td><td>" + numeral(songInfo.fileSize).format('0.00b'),
+        mpField,
         "</td><td><div class=\"progress\" style=\"width:8em;margin-top:5px;margin-right:5px;\"><div class=\"progress-bar\" role=\"progressbar\" aria-valuenow=\"0\" aria-valuemin=\"0\" aria-valuemax=\"100\" id=\"progress-",
         songInfo.fileId,
         "\">",
         "</div></div></td>",
         "</tr>"
         ].join(''));
+
+    if(songInfo.fileInfo["media-type"] == 'archive') {
+       $('#fileinfo-' + songInfo.fileId).tooltip({
+           title: '<pre>' + songInfo.fileInfo.zipdir.files.join("\n") + '</pre>',
+           html: true, 
+           placement: 'auto'
+        });
+    }
+    
 
     if($('#filelist').children().length > 0){
         $('#stems').show();
@@ -95,7 +139,7 @@ ipcRenderer.on('song-info:add-file', (event, songInfo) => {
     $('#loading').hide();
  });
 
-ipcRenderer.on('song-info:error', (event, errorDiscription) => {
+ipcRenderer.on('song-info:error', (event, errorDescription) => {
     // further error handling required
     $('#song').show();
     $('#loading').hide();

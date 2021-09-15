@@ -110,7 +110,8 @@ const getSongInfo = (url, e) => {
           fileId: res.files[i].file_id,
           trackId: res.files[i].file_upload,
           downloadURL: res.files[i].download_url,
-          fileSize: res.files[i].file_rawsize
+          fileSize: res.files[i].file_rawsize,
+          fileInfo: res.files[i].file_format_info
         }
         trackList[trackInfo.fileId] = trackInfo;
 

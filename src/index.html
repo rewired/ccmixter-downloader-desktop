@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+
     <title>Download stems from ccMixter</title>
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
     <style>
@@ -42,7 +43,12 @@
         }
 
         td:last-child{ 
-            width: 9em;
+            width: 8em;
+        }
+
+        td:nth-child(0n+4){
+            width:300px;
+            text-align: center;
         }
 
         td:nth-child(0n+3){
@@ -56,6 +62,22 @@
 
         .example-link {
             cursor: pointer;
+        }
+
+        audio {
+            height: 15px;
+            width: 300px;
+        }
+
+        .fileinfo + .tooltip {
+            width: 600px;
+        }
+
+        .fileinfo + .tooltip > .tooltip-inner {
+            color: #fff;
+            background-color: black;
+            width: 600px;
+            line-break: strict;
         }
     </style>
 </head>
@@ -88,8 +110,8 @@
                     <br/><br />
                     <strong>Examples</strong> (Hint click on any example below)<br />
                     <span class="example-link">http://ccmixter.org/files/7OOP3D/63981</span><br />
-                    <span class="example-link">http://ccmixter.org/files/Apoxode/63986</span><br />
-                    <!--span class="example-link">http://ccmixter.org/files/airtone/64030</!--span><br /-->
+                    <span class="example-link">http://ccmixter.org/files/Apoxode/63986</span> not working!<br />
+                    <span class="example-link">http://ccmixter.org/files/mactonite/64113</span><br />
                 </div>
             </div>
         </div>
@@ -139,7 +161,7 @@
           </div>
         </div>
     </div>
-
+    
     <script defer src="./render.js"></script>
 </body>
 </html>
