@@ -9,9 +9,27 @@ const urlParams = new URLSearchParams(queryString);
 
 let number_of_files = 0;
 
+const isURL = (url) => {
+    const regex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/ig;
+    let result = regex.exec(url) !== null;
+    return result;
+};
+
+const checkURL = () => {
+    if(isURL($("#url").val())) {
+        $('#btnCheck').prop('disabled', false);
+    } else {
+        $('#btnCheck').prop('disabled', true);
+    }
+};
+
 $("#library-form").on("submit", (e) => {
     e.preventDefault();
-    ipcRenderer.send("select-library-path", $("#library_path").val());
+    ipcRenderer.send("preferences:select-library-path", $("#library_path").val());
+});
+
+$("#url").on("keyup paste blur focus", (e) => {
+    checkURL();
 });
 
 $("#song").on("submit", (e) => {
@@ -19,13 +37,12 @@ $("#song").on("submit", (e) => {
     $('#loading').show();
 
     let url = $("#url").val();
-    //console.log("URL", url);
 
     $('#stems').hide();
     $('#song').hide();
     $('#filelist').html("");
 
-    ipcRenderer.send("fetch-json-from-url", url);
+    ipcRenderer.send("song-info:fetch-json", url);
 });
 
 $("#download").on("submit", (e) => {
@@ -45,9 +62,7 @@ $("#download").on("submit", (e) => {
     $('#btnAbortDownload').hide();
 
     number_of_files = formData.length;
-    console.log('number_of_files: ' + number_of_files);
-
-    ipcRenderer.send("download", files);
+    ipcRenderer.send("download:start", files);
 });
 
 $("#btnAbortDownload").on("click", (e) => {
@@ -57,9 +72,7 @@ $("#btnAbortDownload").on("click", (e) => {
     $('#stems').hide();
 });
 
-ipcRenderer.on('add-file', (event, songInfo) => {
-    //console.log(songInfo);
-
+ipcRenderer.on('song-info:add-file', (event, songInfo) => {
     $('#filelist').append([
         "<tr><td><input id=\"",
         songInfo.fileId,
@@ -72,11 +85,6 @@ ipcRenderer.on('add-file', (event, songInfo) => {
         songInfo.fileId,
         "\">",
         "</div></div></td>",
-        /*
-        "<td><span id=\"progress-",
-        songInfo.fileId,
-        "\"><br /></span></td>"
-        */
         "</tr>"
         ].join(''));
 
@@ -87,8 +95,14 @@ ipcRenderer.on('add-file', (event, songInfo) => {
     $('#loading').hide();
  });
 
-ipcRenderer.on('progress', (event, progressInfo) => {
-    //console.log('#progress-' + progressInfo.id + ' ->' + numeral(progressInfo.value).format('0.00') + '%');
+ipcRenderer.on('song-info:error', (event, errorDiscription) => {
+    // further error handling required
+    $('#song').show();
+    $('#loading').hide();
+});
+
+ipcRenderer.on('download:progress', (event, progressInfo) => {
+
     let num = numeral(progressInfo.value).format('0.00');
     pbar = $('#progress-' + progressInfo.id);
     pbar.html(num + '%');
@@ -96,7 +110,6 @@ ipcRenderer.on('progress', (event, progressInfo) => {
 
     if(num == '100.00') {
         number_of_files--;
-        console.log('number_of_files: ' + number_of_files);
         if(number_of_files == 0) {
             $('#btnAbortDownload').show();
             $('#download-in-progress').hide();
@@ -104,7 +117,7 @@ ipcRenderer.on('progress', (event, progressInfo) => {
     }
 });
 
-ipcRenderer.on('library-path-updated', (event, lpath) => {
+ipcRenderer.on('preferences:library-path-set', (event, lpath) => {
     if(lpath != "") {
         $("#library_path").val(lpath);
         $('#btnCheck').prop('disabled', false);
@@ -112,10 +125,13 @@ ipcRenderer.on('library-path-updated', (event, lpath) => {
     }
 });
 
+// ------------------------------------------------------------------------------------
+
 $('#song').show();
 $('#stems').hide();
 $('#loading').hide();
 $('#download-in-progress').hide();
+$('#btnCheck').prop('disabled', true);
 
 let library_path = urlParams.get('library_path');
 if( library_path != '' ) {
@@ -129,6 +145,7 @@ if( library_path != '' ) {
 $(".example-link").on("click", (e) => {
     $("#url").val(($(e.target).html()));
     $("#url").fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
+    checkURL();
 });
 
 $(".copyright-toggle").on("click", (e) => {
@@ -136,5 +153,5 @@ $(".copyright-toggle").on("click", (e) => {
 });
 
 $("#open-folder-in-os").on("click", (e) => {
-    ipcRenderer.send("open-folder-in-os", $("#library_path").val());
+    ipcRenderer.send("library:open-folder", $("#library_path").val());
 });

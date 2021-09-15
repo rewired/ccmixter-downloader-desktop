@@ -5,8 +5,8 @@ const http = require('http');
 const slug = require('slug');
 const Downloader = require('nodejs-file-downloader');
 const Store = require('./store.js');
-const querystring = require('querystring');
 const { shell } = require('electron');
+const axios = require('axios');
 
 let songInfo = {};
 let trackList = {};
@@ -14,6 +14,7 @@ let trackList = {};
 let libraryPath = "";
 let mainWindow;
 
+// check for preferences or set defaults
 const store = new Store({
   configName: 'user-preferences',
   defaults: {
@@ -75,30 +76,32 @@ app.on('activate', () => {
   }
 });
 
+const getAcappellas = (e) => {
+  /*
+  URL: http://ccmixter.org/api/queries?items=reqtags%3Dfeatured%252Cacappella%252C-autoplay%252Cbpm_070_075%26limit%3D10%26lic%3Dall%26dataview%3Ddefault%26offset%3D0%26f%3Djsex&total=f%3Dcount
+  hints:
+  %26   : '&'
+  %3D   : '='
+  %252C : ',' (double encoded)
+                                             reqtags=featured,acappella,-autoplay,bpm_07_075&lic=all&dataview=default&offset=0&f=jsex&total=f=count
+  */
+};
 
 const getSongInfo = (url, e) => {
+
   const ccMixterId = url.split('/').pop();
   const ccMixterSongInfoURL = "http://ccmixter.org/api/query/api?ids=http://ccmixter.org/api/query?f=m3u&ids=" + ccMixterId + "&f=json";
+  trackList = {};
+  let errorMsg = '';
 
-  //console.log(ccMixterSongInfoURL);
+  axios.get(ccMixterSongInfoURL)
+  .then((response) => {
+    if(response.status == '200') {
+      let res = response.data[0];
 
-  http.get(ccMixterSongInfoURL, function(res){
-    var body = '';
-    trackList = {};
-
-    res.on('data', function(chunk){
-      body += chunk;
-    });
-
-    res.on('end', function(){
-      var response = JSON.parse(body);
-      res = response[0];
-      // console.log(response[0]);
       songInfo.title = res.upload_name;
       songInfo.artist = res.user_name;
       songInfo.bpm = res.upload_extra.bpm;
-
-      //console.log(songInfo);
 
       for(var i = 0; i < res.files.length; i++) {
         let trackInfo = {
@@ -111,18 +114,19 @@ const getSongInfo = (url, e) => {
         }
         trackList[trackInfo.fileId] = trackInfo;
 
-        e.sender.send('add-file', trackInfo);
+        e.sender.send('song-info:add-file', trackInfo);
       }
-    });
-  }).on('error', function(e){
-    //@todo: error handling
-    console.log("Got an error: ", e);
+    } else {
+      e.sender.send('song-info:error', 'Failed');
+    }
+  })
+  .catch(error => {
+    e.sender.send('song-info:error', 'Failed');
   });
-
-}
-
+};
 
 const downloadFromUrl = (e, sInfo, cFile) => {
+
   var newFilename = slug(sInfo.artist.toString()) + '_' + slug(sInfo.title.toString()) + '_' + slug(cFile.fileNiceName.toString()) + '[' + sInfo.bpm + ']' + path.extname(cFile.fileName);
 
   ( async () => {
@@ -135,7 +139,7 @@ const downloadFromUrl = (e, sInfo, cFile) => {
         progressInfo.id = cFile.fileId;
         progressInfo.value = percentage;
 
-        e.sender.send('progress', progressInfo);
+        e.sender.send('download:progress', progressInfo);
 
       }
     })
@@ -145,23 +149,23 @@ const downloadFromUrl = (e, sInfo, cFile) => {
       // handle "done"
       //console.log("done: " + newFilename)  
     } catch (error) {
-       console.log(error)
+       console.log(error);
     } 
   })(); 
 }
 
-ipcMain.on("fetch-json-from-url",(e, url)=>{
+ipcMain.on("song-info:fetch-json",(e, url)=>{
   getSongInfo(url, e);
 });
 
-ipcMain.on("download", (e, files) => {
+ipcMain.on("download:start", (e, files) => {
   for (var i = 0; i < files.length; i++) {
     var cur = trackList[files[i]];
     downloadFromUrl(e, songInfo, cur);
   }
 });
 
-ipcMain.on("select-library-path", async (e, curPath) => {
+ipcMain.on("preferences:select-library-path", async (e, curPath) => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']
   });
@@ -169,10 +173,9 @@ ipcMain.on("select-library-path", async (e, curPath) => {
   libraryPath = result.filePaths;
   store.set('libraryPath', libraryPath.toString());
 
-  e.sender.send('library-path-updated', libraryPath);
+  e.sender.send('preferences:library-path-set', libraryPath);
 });
 
-ipcMain.on("open-folder-in-os", (e, path) => {
-  console.log(path);
+ipcMain.on("library:open-folder", (e, path) => {
   shell.showItemInFolder(path);
 });
