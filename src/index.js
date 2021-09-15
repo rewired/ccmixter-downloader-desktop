@@ -30,6 +30,11 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 
 const createWindow = (options, libpath) => {
   options.autoHideMenuBar = true;
+  options.titleBarStyle = 'hidden';
+  /* options.titleBarOverlay = {
+    color: '#2f3241',
+    symbolColor: '#74b1be'
+  } */
   options.webPreferences = {
     nodeIntegration: true,
     contextIsolation: false
