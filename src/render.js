@@ -73,10 +73,6 @@ $("#download").on("submit", (e) => {
     ipcRenderer.send("download:start", files);
 });
 
-$('#exitApp').on('click', e => {
-    ipcRenderer.send("app:exit");
-})
-
 $("#btnAbortDownload").on("click", (e) => {
     e.preventDefault();
     $('#song').show();

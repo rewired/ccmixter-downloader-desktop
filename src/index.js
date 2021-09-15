@@ -7,6 +7,7 @@ const Downloader = require('nodejs-file-downloader');
 const Store = require('./store.js');
 const { shell } = require('electron');
 const axios = require('axios');
+const DecompressZip = require('decompress-zip');
 
 let songInfo = {};
 let trackList = {};
@@ -31,10 +32,15 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 const createWindow = (options, libpath) => {
   options.autoHideMenuBar = true;
   options.titleBarStyle = 'hidden';
-  /* options.titleBarOverlay = {
-    color: '#2f3241',
-    symbolColor: '#74b1be'
-  } */
+  options.minWidth = 1200;
+  options.minHeight = 800;
+  options.fullscreenable = false;
+  options.fullscreen = false;
+  options.maximizable = false;
+  options.titleBarOverlay = {
+    color: '#1c1c1c',
+    symbolColor: '#fff'
+  };
   options.webPreferences = {
     nodeIntegration: true,
     contextIsolation: false
@@ -43,13 +49,17 @@ const createWindow = (options, libpath) => {
   // Create the browser window.
   const mainWindow = new BrowserWindow(options);
 
+  let params = new URLSearchParams('library_path=' + libraryPath);
+
   mainWindow.on('resize', () => {
     let { width, height } = mainWindow.getBounds();
     store.set('windowBounds', { width, height });
   });
 
-  let params = new URLSearchParams('library_path=' + libraryPath);
-  
+  mainWindow.on('maximize', () => {
+    mainWindow.unmaximize();
+  });
+
   // and load the index.html of the app.
   mainWindow.loadURL(url.format ({
     pathname: path.join(__dirname, 'index.html'),
@@ -134,11 +144,12 @@ const getSongInfo = (url, e) => {
 const downloadFromUrl = (e, sInfo, cFile) => {
 
   var newFilename = slug(sInfo.artist.toString()) + '_' + slug(sInfo.title.toString()) + '_' + slug(cFile.fileNiceName.toString()) + '[' + sInfo.bpm + ']' + path.extname(cFile.fileName);
+  var destination = libraryPath + "/" + slug(sInfo.artist.toString()) + "/" + slug(sInfo.title.toString()) + " [" + sInfo.bpm + "]";
 
   ( async () => {
     const downloader = new Downloader({
       url: cFile.downloadURL,
-      directory: libraryPath + "/" + slug(sInfo.artist.toString()) + "/" + slug(sInfo.title.toString()) + " [" + sInfo.bpm + "]",
+      directory: destination,
       fileName: newFilename,
       onProgress: (percentage,chunk,remainingSize) => {
         var progressInfo = {};
@@ -146,23 +157,41 @@ const downloadFromUrl = (e, sInfo, cFile) => {
         progressInfo.value = percentage;
 
         e.sender.send('download:progress', progressInfo);
-
       }
     })
 
     try {
       await downloader.download();
       // handle "done"
-      //console.log("done: " + newFilename)  
+      console.log(cFile);
+      if(cFile.fileInfo["media-type"] == "archive" && cFile.fileInfo["default-ext"] == "zip"){
+        //console.log("done: " + destination + '/' + newFilename);
+        let unzipper = new DecompressZip(destination + '/' + newFilename)
+
+        unzipper.on('error', function (err) {
+            console.log('Caught an error:', err);
+        });
+        unzipper.on('extract', function (log) {
+            console.log('Finished extracting');
+        });
+        unzipper.on('progress', function (fileIndex, fileCount) {
+            console.log('Extracted file ' + (fileIndex + 1) + ' of ' + fileCount);
+        });
+
+        unzipper.extract({
+          path: destination + '/' + slug(sInfo.title.toString()) + '_' + slug(cFile.fileNiceName.toString()),
+          restrict: false,
+          filter: function (file) {
+              return file.type !== "SymbolicLink";
+          }
+        });
+
+      };
     } catch (error) {
        console.log(error);
     } 
   })(); 
 }
-
-ipcMain.on("app:exit", (e, arg) =>{
-  app.quit();
-});
 
 ipcMain.on("song-info:fetch-json",(e, url)=>{
   getSongInfo(url, e);
