@@ -22,18 +22,15 @@
             width: 100%
         }
 
+        #loading {
+            text-align: center;
+            padding: 10px;
+        }
+
         ul#filelist {
             list-style-type: none;
             padding-left: 0;
             margin: 0;
-        }
-
-        #loading {
-            position: absolute;
-            width: 100vw;
-            height: 100vh;
-            background-color: #fff;
-            text-align: center;
         }
 
         #loading img {
@@ -81,17 +78,17 @@
             width: 600px;
             line-break: strict;
         }
+
+        #exitApp {
+            -webkit-app-region: no-drag;
+        }
     </style>
 </head>
 <body>
-    <div id="loading">
-        <h2 style="margin-top: 32vh;">Working...</h2>
-        <img src="./resources/loading.svg" /><br />
-    </div>
-
     <div class="container-fluid">
         <div class="row" style="-webkit-app-region: drag">
             <div class="col-md-12" style="margin: 5px">
+                <button id="exitApp" type="button" class="btn-close"></button>
                 <strong>ccMixter Downloader</strong>
             </div>
         </div>
@@ -135,6 +132,9 @@
                     </div>    
                     <button type="submit" id="btnCheck" class="btn btn-primary">Check</button>
                 </form>
+                <div id="loading" class="bg-info">
+                    Fetching data from ccMixter.org... please be patient.
+                </div>
             </div>
         </div>
         

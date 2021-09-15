@@ -160,6 +160,10 @@ const downloadFromUrl = (e, sInfo, cFile) => {
   })(); 
 }
 
+ipcMain.on("app:exit", (e, arg) =>{
+  app.quit();
+});
+
 ipcMain.on("song-info:fetch-json",(e, url)=>{
   getSongInfo(url, e);
 });
