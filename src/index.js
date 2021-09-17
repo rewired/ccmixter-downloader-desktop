@@ -8,6 +8,7 @@ const Store = require('./store.js');
 const { shell } = require('electron');
 const axios = require('axios');
 const DecompressZip = require('decompress-zip');
+const fs = require('fs');
 
 let songInfo = {};
 let trackList = {};
@@ -166,16 +167,25 @@ const downloadFromUrl = (e, sInfo, cFile) => {
       console.log(cFile);
       if(cFile.fileInfo["media-type"] == "archive" && cFile.fileInfo["default-ext"] == "zip"){
         //console.log("done: " + destination + '/' + newFilename);
-        let unzipper = new DecompressZip(destination + '/' + newFilename)
+        let unzipper = new DecompressZip(destination + '/' + newFilename);
 
         unzipper.on('error', function (err) {
-            console.log('Caught an error:', err);
+          console.log('Caught an error:', err);
         });
         unzipper.on('extract', function (log) {
-            console.log('Finished extracting');
+          fs.unlink(destination + '/' + newFilename, (err => {
+            if (err) console.log(err);
+            else {
+              console.log("\nDeleted file: " + destination + '/' + newFilename);
+            }
+          }));
+          e.sender.send('download:finished', 'All finished');
         });
         unzipper.on('progress', function (fileIndex, fileCount) {
-            console.log('Extracted file ' + (fileIndex + 1) + ' of ' + fileCount);
+          e.sender.send('download:uncompress', {
+            id: cFile.fileId,
+            text: 'Extracted file ' + (fileIndex + 1) + ' of ' + fileCount
+          });
         });
 
         unzipper.extract({

@@ -161,6 +161,10 @@ ipcRenderer.on('download:progress', (event, progressInfo) => {
     }
 });
 
+ipcRenderer.on('download:uncompress', (event, msg) => {
+    $('#fileinfo-' + msg.id).html(msg.text);
+});
+
 ipcRenderer.on('preferences:library-path-set', (event, lpath) => {
     if(lpath != "") {
         $("#library_path").val(lpath);
