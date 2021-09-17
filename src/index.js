@@ -153,9 +153,11 @@ const downloadFromUrl = (e, sInfo, cFile) => {
       directory: destination,
       fileName: newFilename,
       onProgress: (percentage,chunk,remainingSize) => {
-        var progressInfo = {};
-        progressInfo.id = cFile.fileId;
-        progressInfo.value = percentage;
+        let progressInfo = {
+          id: cFile.fileId,
+          fileType: cFile.fileInfo["default-ext"],
+          value: percentage
+        };
 
         e.sender.send('download:progress', progressInfo);
       }
@@ -184,6 +186,8 @@ const downloadFromUrl = (e, sInfo, cFile) => {
         unzipper.on('progress', function (fileIndex, fileCount) {
           e.sender.send('download:uncompress', {
             id: cFile.fileId,
+            currentFile: fileIndex + 1,
+            "fileCount": fileCount, 
             text: 'Extracted file ' + (fileIndex + 1) + ' of ' + fileCount
           });
         });

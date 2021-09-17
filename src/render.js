@@ -153,7 +153,10 @@ ipcRenderer.on('download:progress', (event, progressInfo) => {
     pbar.width(num);
 
     if(num == '100.00') {
-        number_of_files--;
+        if(progressInfo.fileType != 'zip') {
+            number_of_files--;
+        }
+
         if(number_of_files == 0) {
             $('#btnAbortDownload').show();
             $('#download-in-progress').hide();
@@ -163,6 +166,14 @@ ipcRenderer.on('download:progress', (event, progressInfo) => {
 
 ipcRenderer.on('download:uncompress', (event, msg) => {
     $('#fileinfo-' + msg.id).html(msg.text);
+    if(msg.currentFile == msg.fileCount) {
+        number_of_files--;
+
+        if(number_of_files == 0) {
+            $('#btnAbortDownload').show();
+            $('#download-in-progress').hide();
+        }
+    }
 });
 
 ipcRenderer.on('preferences:library-path-set', (event, lpath) => {

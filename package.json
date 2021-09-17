@@ -1,9 +1,14 @@
 {
   "name": "ccmixter-downloader-desktop",
   "productName": "ccMixter Downloader",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Downloader for stems at ccmixter.org",
   "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/rewired/ccmixter-downloader-desktop"
+  },
+
   "scripts": {
     "start": "set NODE_OPTIONS=--max-http-header-size=16384 && electron-forge start",
     "package": "electron-forge package",
